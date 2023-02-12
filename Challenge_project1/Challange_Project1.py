@@ -91,25 +91,29 @@ def error_norm(x, x_true):
 def condition_number(H):
     return np.linalg.cond(H, np.inf)
 
+def toPrecisionString(val, pre):
+    return np.format_float_positional(np.float32(val), unique=False, precision=pre)
+
 
 if __name__ == '__main__':
     # Generate Hilbert Matrix
     print("")
-    print("=================================== Generate Hilbert Matrix ==================================|")
-    print(f"|n             | error                     | residual                      | Cond(H)         |")
-    print("==============================================================================================|")
+    print("========================================= Generate Hilbert Matrix ======================================|")
+    print(f"|n             | error                 | residual                                    | Cond(H)         |")
+    print("========================================================================================================|")
     for n in range(2, 100):
         H, b = generateHb(n)
         x = np.ones(n)
         x_approx = gauss_elimination(H, b)
         res = residual_norm(H, x_approx, b)
-        err = error_norm(x_approx, x)
+        err = error_norm(x, x_approx)
+        error_percent = 100 * (err / np.linalg.norm(x_approx, np.inf))
         cond = condition_number(H)
-        if err <= 100:
-            print(f"n = {n}         | error = {err:.2e}          | residual = {res:.2e}           | Cond(H) = {cond:.2e}")
+        if error_percent <= 100:
+            print(f"n = {n}         | error% = {toPrecisionString(error_percent, 3)}         | residual = {toPrecisionString(res, 20)}           | Cond(H) = {toPrecisionString(cond, 2)}")
         else:
             break
-    print("")        
+    print("")
        
 
 
