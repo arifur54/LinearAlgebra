@@ -25,4 +25,4 @@ print(f"A:\n {A}")
 print(f"Q Result :\n {Q}")
 print(f"R Result :\n {R}")
 
-print(f"Varify Result -> got: \n {np.dot(Q, R)} \n given: \n {A}")
+print(f"Varify Result (multiply Q * R) -> \n got: \n {np.dot(Q, R)} \n given: \n {A}")
