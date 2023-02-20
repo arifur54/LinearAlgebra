@@ -1,28 +1,50 @@
 import numpy as np
 
-def householder(A):
-    m, n = A.shape
-    R = np.copy(A)
-    Q = np.identity(m)
-    for i in range(n):
-        x = R[i:, i]
-        e = np.zeros_like(x)
-        e[0] = np.linalg.norm(x)
-        u = x - e
-        v = u / np.linalg.norm(u)
-        H = np.identity(m)
-        H[i:, i:] -= 2 * np.outer(v, v)
-        R = np.dot(H, R)
-        Q = np.dot(Q, np.transpose(H))
-        print(f"Step ======= {i} =========")
+def column_convertor(x):
+    x.shape = (1, x.shape[0])
+    return x
+
+def get_norm(x):
+    return np.sqrt(np.sum(np.square(x)))
+
+def householder_transformation(v):
+    vector_size = v.shape[1]
+    e = np.zeros_like(v)
+    e[0, 0] = 1
+    vector = get_norm(v) * e
+    if v[0,0] < 0:
+        vector = - vector
+    updatedV = (v + vector).astype(np.float32)
+    H = np.identity(vector_size) - ((2 * np.matmul(np.transpose(updatedV), updatedV)) / np.matmul(updatedV, np.transpose(updatedV)))
+    return H
+
+def qr_factorization(A):
+    n, m = A.shape
+    Q = np.identity(n)
+    R = A.astype(np.float32)
+    for i in range(min(n, m)):
+        v = column_convertor(R[i:, i])
+        Hbar = householder_transformation(v)
+        H = np.identity(n)
+        H[i:, i:] = Hbar
+        R = np.matmul(H, R)
+        Q = np.matmul(Q, H)
+        R = np.around(R, decimals=5)
+        Q = np.around(Q, decimals=5)
+        print(f"Step ======= {i+1} =========")
         print(f"Q: {Q} \n R: {R}")
+       
     return Q, R
 
-A = np.array([[1, -1, 4], [1, 4, -2], [1, 4, 2], [1, -1, 0]])
-Q, R = householder(A)
+if __name__ == "__main__":
+    A = np.array([[1, -1, 4], [1, 4, -2], [1, 4, 2], [1, -1, 0]])
+    Q, R = qr_factorization(A)
+    R = np.around(R, decimals=5)
+    Q = np.around(Q, decimals=5)
+    print('A after QR factorization')
+    print('R matrix')
+    print(R, '\n')
+    print('Q matrix')
+    print(Q)
 
-print(f"A:\n {A}")
-print(f"Q Result :\n {Q}")
-print(f"R Result :\n {R}")
 
-print(f"Varify Result (multiply Q * R) -> \n got: \n {np.dot(Q, R)} \n given: \n {A}")
