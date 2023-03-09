@@ -74,6 +74,15 @@ def LU_decomposition(A):
 
     return L, U
 
+def GaussElimination(A, b):
+    n = len(A)
+    for i in range(n):
+        for j in range(i + 1, n):
+            m = A[j][i] / A[i][i]
+            b[j] = b[j] - m * b[i]
+            for k in range(n):
+                A[j][k] = A[j][k] - m * A[i][k]
+    return A, b
 
 
 def gauss_elimination(A, b):
@@ -82,11 +91,15 @@ def gauss_elimination(A, b):
     x = backward_substitution(U, y)
     return x
 
-def residual_norm(H, x, b):
-    return np.linalg.norm(b - np.dot(H, x), np.inf)
-
-def error_norm(x, x_true):
-    return np.linalg.norm(x - x_true, np.inf)
+def getAllCalculatedValues(H, b, x_hat, x_true):
+    residual = b - np.dot(H, x_hat)
+    x2_norm = np.linalg.norm(x_hat, ord=2)
+    deltaX = np.subtract(x_hat, x_true)
+    residual_norm = np.linalg.norm(residual, np.inf)
+    deltaX_2Norm = np.linalg.norm(deltaX, ord=2)
+    xRE_norm = np.divide(deltaX_2Norm, x2_norm)
+    xRE_percentage = np.divide(deltaX_2Norm, x2_norm) * 100
+    return residual, deltaX, x2_norm, xRE_norm, xRE_percentage, residual_norm, deltaX_2Norm
 
 def condition_number(H):
     return np.linalg.cond(H, np.inf)
@@ -98,22 +111,23 @@ def toPrecisionString(val, pre):
 if __name__ == '__main__':
     # Generate Hilbert Matrix
     print("")
-    print("========================================= Generate Hilbert Matrix ======================================|")
-    print(f"|n             | error                 | residual                                    | Cond(H)         |")
-    print("========================================================================================================|")
-    for n in range(2, 100):
+    print("========================================= Generate Hilbert Matrix ========================================================================|")
+    print(f"|n                         | error%                                              | residual                             | Cond(H)         |")
+    print("==========================================================================================================================================|")
+    error_Percentage = []
+    for n in range(2, 20):
         H, b = generateHb(n)
         x = np.ones(n)
-        x_approx = gauss_elimination(H, b)
-        res = residual_norm(H, x_approx, b)
-        err = error_norm(x, x_approx)
-        error_percent = 100 * (err / np.linalg.norm(x_approx, np.inf))
+        x_hat = gauss_elimination(H, b)
+        res, deltaX, x2_norm, xRE_norm, xRE_percentage, res_norm, deltaX_2Norm = getAllCalculatedValues(H, b, x_hat, x)
         cond = condition_number(H)
-        if error_percent <= 100:
-            print(f"n = {n}         | error% = {toPrecisionString(error_percent, 3)}         | residual = {toPrecisionString(res, 20)}           | Cond(H) = {toPrecisionString(cond, 2)}")
+        error_Percentage.append(xRE_percentage)
+        if xRE_percentage > 100:
+           break;
         else:
-            break
+            print(f"n = {n}               | error% = {xRE_percentage}                       | residual = {res_norm}                    | Cond(H) = {toPrecisionString(cond, 2)}")
     print("")
+
        
 
 

@@ -33,7 +33,6 @@ def qr_factorization(A):
         Q = np.around(Q, decimals=5)
         print(f"Step ======= {i+1} =========")
         print(f"Q: {Q} \n R: {R}")
-       
     return Q, R
 
 if __name__ == "__main__":
